@@ -1,11 +1,19 @@
 from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi import Request, status, Form
-from app.dependencies import SessionDep
+from fastapi import Request, status, Form, UploadFile, HTTPException
+from app.dependencies.session import SessionDep
+from app.dependencies.auth import AuthDep
 from . import api_router
 from app.services.user_service import UserService
 from app.repositories.user import UserRepository
 from app.utilities.flash import flash
 from app.schemas import UserResponse
+from app.models.signs import SignImage
+from app.image_utils import delete_sign_image, process_sign_image
+from app.config import Settings
+from typing import Annotated
+from starlette.concurrency import run_in_threadpool
+from PIL import UnidentifiedImageError
+
 
 
 # API endpoint for listing users
@@ -14,3 +22,38 @@ async def list_users(request: Request, db: SessionDep):
     user_repo = UserRepository(db)
     user_service = UserService(user_repo)
     return user_service.get_all_users()
+
+@api_router.post("/user/add_image")
+async def post_new_image(
+    user: AuthDep,
+    file: UploadFile,
+    db: SessionDep,
+    desc: Annotated[str, Form()],
+    lat: Annotated[float, Form()],
+    lng: Annotated[float, Form()],
+):
+    content = await file.read()
+
+    if len(content) > (6 * 1024 * 1024):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"File too large. Maximum size is 6MB",
+        )
+
+    try:
+        new_filename = await run_in_threadpool(process_sign_image, content)
+    except UnidentifiedImageError as err:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid image file. Please upload a valid image (JPEG, PNG, GIF, WebP).",
+        ) from err
+
+    try:
+        db.add(SignImage(user_id=user.id, file_name=new_filename, description=desc, latitude=lat, longitude=lng))
+        db.commit()
+    except:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Image upload failed",
+        )

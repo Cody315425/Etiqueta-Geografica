@@ -7,7 +7,6 @@ from app.services.user_service import UserService
 from app.repositories.user import UserRepository
 from app.utilities.flash import flash
 from app.schemas import UserResponse
-from app.schemas.image import ImageData
 from app.models.signs import SignImage
 from app.image_utils import delete_sign_image, process_sign_image
 from app.config import Settings
@@ -29,7 +28,9 @@ async def post_new_image(
     user: AuthDep,
     file: UploadFile,
     db: SessionDep,
-    data: ImageData
+    desc: Annotated[str, Form()],
+    lat: Annotated[float, Form()],
+    lng: Annotated[float, Form()]
 ):
     content = await file.read()
 
@@ -48,7 +49,7 @@ async def post_new_image(
         ) from err
 
     try:
-        db.add(SignImage(user_id=user.id, file_name=new_filename, description=data.desc, latitude=data.latitude, longitude=data.longitude))
+        db.add(SignImage(user_id=user.id, file_name=new_filename, description=desc, latitude=lat, longitude=lng))
         db.commit()
     except:
         db.rollback()

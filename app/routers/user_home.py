@@ -29,3 +29,19 @@ async def user_home_view(
             "signs": signs,
         }
     )
+
+@router.get("/user")
+async def user_page_view(
+    request: Request,
+    user: AuthDep,
+    db: SessionDep
+):
+    user_images = db.exec(select(SignImage).where(SignImage.user_id == user.id)).all()
+    return templates.TemplateResponse(
+        request=request, 
+        name="user.html",
+        context={
+            "user": user,
+            "user_images" : user_images,
+        }
+    )

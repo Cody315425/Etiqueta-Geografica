@@ -3,7 +3,7 @@ from fastapi import Request, status, Form, UploadFile, HTTPException, Query
 from sqlmodel import select
 from app.dependencies.session import SessionDep
 from app.dependencies.auth import AuthDep
-from . import api_router
+from . import api_router, router
 from app.services.user_service import UserService
 from app.repositories.user import UserRepository
 from app.utilities.flash import flash
@@ -24,20 +24,6 @@ async def list_users(request: Request, db: SessionDep):
     user_repo = UserRepository(db)
     user_service = UserService(user_repo)
     return user_service.get_all_users()
-
-@api_router.get("/user")
-async def user_page_view(
-    request: Request,
-    user: AuthDep,
-    db:SessionDep
-):
-    return templates.TemplateResponse(
-        request=request, 
-        name="user.html",
-        context={
-            "user": user
-        }
-    )
 
 @api_router.post("/user/add_image")
 async def post_new_image(

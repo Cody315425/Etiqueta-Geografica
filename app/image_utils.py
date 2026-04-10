@@ -4,7 +4,7 @@ from pathlib import Path
 
 from PIL import Image, ImageOps
 
-SIGN_PICS_DIR = Path("media/sign_pics")
+SIGN_PICS_DIR = Path("app/media/sign_pics")
 
 #Handle image processing based on the bytes collected from the user
 def process_sign_image(content: bytes) -> str:

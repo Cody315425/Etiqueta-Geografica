@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends, Request
+from fastapi.encoders import jsonable_encoder
 from sqlmodel import select
 from sqlalchemy.orm import selectinload
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -26,7 +27,7 @@ async def user_home_view(
         name="app.html",
         context={
             "user": user,
-            "signs": signs,
+            "signs": jsonable_encoder(signs),
         }
     )
 

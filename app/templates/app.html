@@ -1,7 +1,31 @@
 {% extends "authenticated-base.html" %}
 
+{% block additional_styles %}
+<style>
+    #map { 
+        height: 60vh; 
+        width: 60vh;
+    }
+</style>
+{% endblock %}
+
+
+
 {% block external_js %}
-<!-- <script src="{{ url_for('static', path='js/app.js')}}"></script> -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+<script>
+    var map = L.map('map').setView([10.45, -61.35], 9.4);
+    var wmsLayer = L.tileLayer.wms('https://geoserver.sundaebytestt.com/geoserver/wms', {
+        layers: 'osm:osm_nohouse'
+    }).addTo(map);
+    const signs = {{signs | tojson}}
+
+    for(let sign of signs){
+        L.marker([sign.latitude, sign.longitude]).addTo(map);
+    }
+</script>
 {% endblock %}
 
 
@@ -27,5 +51,7 @@
             <span class="visually-hidden">Next</span>
         </button>
     </div>
+    <div id="map" class="mx-auto"></div>
 
 {% endblock %}
+

@@ -61,7 +61,7 @@ async def post_new_image(
         )
 
 @api_router.post("/delete/{image_id}")
-def delete_user_image(
+async def delete_user_image(
     user:AuthDep,
     request: Request, 
     db: SessionDep,

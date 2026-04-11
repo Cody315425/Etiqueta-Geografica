@@ -2,10 +2,6 @@
 
 {% block additional_styles %}
 <style>
-    #map { 
-        height: 60vh; 
-        width: 60vh;
-    }
 </style>
 {% endblock %}
 
@@ -49,30 +45,34 @@
 
 
 {% block subpage_content %}
-    
-    <div id="carousel" class="carousel slide mx-auto" style="max-height: 50vh; max-width: 100vh;">
-        <div class="carousel-inner" style="height: 50vh; width: 100vh; background-color: #111;">
-            {% for sign in signs %}
-                <div {% if loop.first %} id="first-img" {% endif %} class="carousel-item {% if loop.first %} active {% endif %} h-100"
-                    data-lat="{{sign.latitude}}"
-                    data-lng="{{sign.longitude}}">
-                    <img src="/media/sign_pics/{{sign.file_name}}" 
-                        class="d-block mx-auto h-100" 
-                        style="object-fit: contain; width: auto;" 
-                        alt="{{sign.description}}">
+    <div class="container">
+        <div class="row">
+            <div id="carousel" class="carousel slide mx-auto col-md-6">
+                <div class="carousel-inner" style="background-color: #111;">
+                    {% for sign in signs %}
+                        <div {% if loop.first %} id="first-img" {% endif %} class="carousel-item {% if loop.first %} active {% endif %} h-100"
+                            data-lat="{{sign.latitude}}"
+                            data-lng="{{sign.longitude}}">
+                            <img src="/media/sign_pics/{{sign.file_name}}" 
+                                class="d-block mx-auto h-100" 
+                                style="object-fit: contain; width: auto;" 
+                                alt="{{sign.description}}">
+                        </div>
+                    {% endfor %}
                 </div>
-            {% endfor %}
+                <button class="carousel-control-prev" type="button" data-bs-target="#carousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+            </div>
+            <div id="map" class="mx-auto col-md-6"></div>
         </div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#carousel" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Previous</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#carousel" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Next</span>
-        </button>
     </div>
-    <div id="map" class="mx-auto"></div>
+    
 
 {% endblock %}
 

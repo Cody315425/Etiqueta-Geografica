@@ -16,15 +16,34 @@
      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
      crossorigin=""></script>
 <script>
+    //This is the map code that controls the options for the map
     var map = L.map('map').setView([10.45, -61.35], 9.4);
+    
+    //We're using the link and layer from the project specification doc 
     var wmsLayer = L.tileLayer.wms('https://geoserver.sundaebytestt.com/geoserver/wms', {
         layers: 'osm:osm_nohouse'
     }).addTo(map);
-    const signs = {{signs | tojson}}
 
-    for(let sign of signs){
-        L.marker([sign.latitude, sign.longitude]).addTo(map);
-    }
+    //Code for printing all of the signs
+    // const signs = {{signs | tojson}}
+
+    // for(let sign of signs){
+    //     L.marker([sign.latitude, sign.longitude]).addTo(map);
+    // }
+
+    //We need to create a marker for explicitly the first img in the carousel
+    const first = document.getElementById('first-img')
+    var marker = L.marker([first.dataset.lat, first.dataset.lng]).addTo(map);
+    map.panTo(marker.getLatLng())
+
+    //This function listens for the carousel slide to change before it creates a new marker at that location
+    //it also removes the previous marker beforehand and pans to the new one.
+    const myCarousel = document.getElementById('carousel');
+    myCarousel.addEventListener('slid.bs.carousel', event => {
+        marker.remove()
+        marker = L.marker([event.relatedTarget.dataset.lat, event.relatedTarget.dataset.lng]).addTo(map);
+        map.panTo(marker.getLatLng())
+    })
 </script>
 {% endblock %}
 
@@ -34,7 +53,9 @@
     <div id="carousel" class="carousel slide mx-auto" style="max-height: 50vh; max-width: 100vh;">
         <div class="carousel-inner" style="height: 50vh; width: 100vh; background-color: #111;">
             {% for sign in signs %}
-                <div class="carousel-item {% if loop.first %} active {% endif %} h-100">
+                <div {% if loop.first %} id="first-img" {% endif %} class="carousel-item {% if loop.first %} active {% endif %} h-100"
+                    data-lat="{{sign.latitude}}"
+                    data-lng="{{sign.longitude}}">
                     <img src="/media/sign_pics/{{sign.file_name}}" 
                         class="d-block mx-auto h-100" 
                         style="object-fit: contain; width: auto;" 

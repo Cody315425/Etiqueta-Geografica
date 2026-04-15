@@ -1,5 +1,6 @@
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi import Request, status, Form, UploadFile, HTTPException, Query
+from fastapi.encoders import jsonable_encoder
 from sqlmodel import select
 from app.dependencies.session import SessionDep
 from app.dependencies.auth import AuthDep
@@ -25,7 +26,7 @@ async def list_users(request: Request, db: SessionDep):
     user_service = UserService(user_repo)
     return user_service.get_all_users()
 
-@api_router.post("/user/add_image")
+@api_router.post("/upload")
 async def post_new_image(
     user: AuthDep,
     file: UploadFile,
@@ -60,14 +61,31 @@ async def post_new_image(
             detail="Image upload failed",
         )
 
-@api_router.post("/delete/{image_id}")
+@router.get("/upload")
+async def submit_view(
+    user:AuthDep,
+    request: Request, 
+    db: SessionDep,
+):
+    user_images = db.exec(select(SignImage).where(SignImage.user_id == user.id)).all()
+    user_images = list(user_images)
+    return templates.TemplateResponse(
+        request=request, 
+        name="upload.html",
+        context={
+            "user": user,
+            "user_images" : jsonable_encoder(user_images),
+        }
+    )
+
+@api_router.get("/delete/{image_id}")
 async def delete_user_image(
     user:AuthDep,
     request: Request, 
     db: SessionDep,
     image_id: int,
 ):
-    url = "/user"
+    url = "/upload"
     image = db.exec(select(SignImage).where(SignImage.id == image_id)).one_or_none()
     if not image:
         raise HTTPException(status_code = 404, detail="Image not found")

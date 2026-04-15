@@ -31,6 +31,26 @@ async def user_home_view(
         }
     )
 
+@router.get("/map")
+async def map_view(
+    request: Request,
+    user: AuthDep,
+    db:SessionDep
+):  
+    statement = select(SignImage).options(selectinload(SignImage.user))
+    db_signs = db.exec(statement).all()
+
+    signs = [SignPublic.model_validate(s) for s in db_signs]
+    return templates.TemplateResponse(
+        request=request, 
+        name="map.html",
+        context={
+            "user": user,
+            "signs": jsonable_encoder(signs),
+        }
+    )
+
+
 @router.get("/user")
 async def user_page_view(
     request: Request,
